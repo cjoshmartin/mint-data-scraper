@@ -1,0 +1,17 @@
+{
+  "name": "money-data",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "josh martin <chajmart@iu.edu>",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "mongodb": "^3.3.5",
+    "puppeteer": "^2.0.0",
+    "twilio": "^3.37.1"
+  }
+}
