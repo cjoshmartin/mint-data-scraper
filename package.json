@@ -12,6 +12,13 @@
     "dotenv": "^8.2.0",
     "mongodb": "^3.3.5",
     "puppeteer": "^2.0.0",
-    "twilio": "^3.37.1"
+    "tslint": "^5.20.1",
+    "tslint-config-airbnb": "^5.11.2",
+    "twilio": "^3.37.1",
+    "typescript": "^3.7.4"
+  },
+  "devDependencies": {
+    "@types/mongodb": "^3.3.13",
+    "@types/puppeteer": "^2.0.0"
   }
 }
