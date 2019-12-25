@@ -52,16 +52,21 @@ class Utils {
     // @ts-ignore
     return listOfSelectors.find(e => e.text === searchValue);
   }
+
   async getSelectorFromArrayAndClick(selectors: string, searchValue: string) {
 
-    await this.page.evaluate(async (selectors, searchValue, sleepTime= 0) => {
-      const selector = this.getSelectorFromArrayOfSelectors(selectors, searchValue, document);
-      await Utils.promisedBasedSleep(sleepTime);
-    // @ts-ignore
+    const selectedSelector: HTMLAnchorElement = await this.page.evaluate((selectors, searchValue, sleepTime= 0) =>  {
+      const queryList = document.querySelectorAll<HTMLAnchorElement>(selectors) as any;
+      const listOfSelectors = Array.from(queryList) as any;
+      const selector = listOfSelectors.find(e => e.text === searchValue) as any;
+  //   await Utils.promisedBasedSleep(sleepTime);
       selector.click();
+      return selector;
 
-    }, selectors, searchValue);
+    },
+                                                      selectors, searchValue);
 
+    const a = {};
   }
   async getInnerTextOfSelector(selector) {
     await this.waitForSelector(selector);
