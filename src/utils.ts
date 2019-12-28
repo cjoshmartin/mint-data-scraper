@@ -1,4 +1,4 @@
-import  puppeteer, { Page, Browser } from  'puppeteer';
+import  puppeteer, { Page, Browser, ElementHandle, Serializable } from  'puppeteer';
 
 const fillField = (selector, val) => { document.querySelector(selector).value = val; };
 // @ts-ignore
@@ -44,30 +44,33 @@ class Utils {
     return Array.from(items);
   }
   getArrayOfSelectors(selectors, document) {
-    return this.getArrayOf(document.querySelectorAll(selectors));
+    return this.getArrayOf(document.querySelectorAll(selectors) as any);
   }
 
   getSelectorFromArrayOfSelectors(selectors, searchValue, document) {
-    const listOfSelectors = this.getArrayOfSelectors(selectors, document);
+    const listOfSelectors = this.getArrayOfSelectors(selectors, document) as any;
     // @ts-ignore
-    return listOfSelectors.find(e => e.text === searchValue);
+    return listOfSelectors.find(e => e.text === searchValue) as any;
   }
 
-  async getSelectorFromArrayAndClick(selectors: string, searchValue: string) {
+  async getSelectorFromArrayAndClick(selectors: string, searchValue: string, sleepTime: number = 0) {
 
-    const selectedSelector: HTMLAnchorElement = await this.page.evaluate((selectors, searchValue, sleepTime= 0) =>  {
-      const queryList = document.querySelectorAll<HTMLAnchorElement>(selectors) as any;
-      const listOfSelectors = Array.from(queryList) as any;
-      const selector = listOfSelectors.find(e => e.text === searchValue) as any;
-  //   await Utils.promisedBasedSleep(sleepTime);
-      selector.click();
-      return selector;
+    const listOfSelectors: ElementHandle[] = await this.page.$$(selectors);
 
-    },
-                                                      selectors, searchValue);
+    for (let i = 0; i < listOfSelectors.length; i += 1) {
+      const selector: ElementHandle = listOfSelectors[i];
+      const elementText = await selector.evaluate(node => node['innerText']);
+      console.log(elementText);
+      const isSearchElement: boolean = elementText === searchValue;
 
-    const a = {};
+      if (isSearchElement) {
+        await Utils.promisedBasedSleep(sleepTime);
+        selector.click();
+        break;
+      }
+    }
   }
+
   async getInnerTextOfSelector(selector) {
     await this.waitForSelector(selector);
 
