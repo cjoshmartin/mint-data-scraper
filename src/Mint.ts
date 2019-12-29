@@ -2,6 +2,7 @@
 import twilio  from 'twilio';
 import mongodb from 'mongodb';
 import utils, { LoginForm } from './utils';
+import { ElementHandle } from 'puppeteer';
 
 export default class Mint extends utils{
   private mongoUrl: string;
@@ -30,24 +31,24 @@ export default class Mint extends utils{
   }
 
   async getFacts() {
-    const forEachFact = (output) => {
-      return (el) => { // Currying
-        const childrenNodes = el.children;
-        const catagory = childrenNodes[0].textContent;
-        const facts = childrenNodes[1].childrenret;
+    // const output: object = {};
+    return await this.page.$$eval('#facts dl:not(.hide)',
+                                  (nodes: Element[]) => {
+                                    const output = {};
+                                    nodes.forEach((el: Element) => {
+                                      const childrenNodes = el.children;
+                                      const catagory: string = childrenNodes.item(0).textContent;
+                                      const facts = childrenNodes.item(1).children;
 
-        output[catagory] = { place: facts[1].textContent, amount: facts[0].textContent };
-      };
-    };
-
-    return await this.page.evaluate(() => {
-      const output = {};
-      const factsSelectors = this
-                             .getArrayOfSelectors('#facts dl:not(.hide)', document);
-      factsSelectors.forEach(forEachFact(output));
-      console.log(`Facts: ${output}`);
-      return output;
-    });
+                                      output[catagory] =
+                                      {
+                                        place: facts.item(1).textContent,
+                                        amount: facts.item(0).textContent,
+                                      };
+                                    });
+                                    console.log(`Facts: ${output}`);
+                                    return output;
+                                  });
   }
 
   async getVerifcationCode() {
@@ -96,57 +97,46 @@ export default class Mint extends utils{
     await this.navigateTo('https://mint.intuit.com/trend.event');
     await this.waitForSelector('h1.spending');
     await Mint.promisedBasedSleep(5000);
-    await this.getSelectorFromArrayAndClick('.left-nav .open a', 'By Merchant');
-    const a = {};
-//     await Mint.promisedBasedSleep(5000);
-//     await this.clickButton('a#show-more-less');
+    await this.getSelectorFromArrayAndClick('.left-nav .open a', 'By Merchant', 1000);
+    await Mint.promisedBasedSleep(5000);
+    await this.clickButton('a#show-more-less');
 
-//     await Mint.promisedBasedSleep(5000);
+    await Mint.promisedBasedSleep(5000);
 
-//     const spending = await this.page.evaluate(() => {
-//       const tranactionList = this
-//                             .getArrayOfSelectors('#portfolio-entries tr', document)
-//                             .map((element) => {
+    interface Tranaction {
+      company: string;
+      amount: string;
+    }
+    const tranactionList: object[] = await this.page.$$eval('#portfolio-entries tr',
+                                                            (nodes: Element[]) => nodes.map(
+                                                              (e: Element) => {
+                                                                const company = e.children.item(0).textContent;
+                                                                const amount = e.children.item(1).textContent;
 
-//                 // @ts-ignore
-//                 const child = element.children;
-//                 const company = child[0].textContent;
-//                 const amount = child[1].textContent;
-//                 return { company, amount };
-//             }).filter(e => e['amount'].length > 0);
-//       return { ...tranactionList };
-//     });
+                                                                return { company, amount };
+                                                              })
+                                                              .filter(
+                                                                (e: Tranaction) => e.amount.length > 0),
+    );
 
-//     const funFacts = await this.getFacts();
+    const funFacts = await this.getFacts();
 
-//     await this.page.evaluate(async () => {
-//       const netIncomeSelector = this
-//                        .getSelectorFromArrayOfSelectors('.left-nav a', 'Net Income', document);
-// // @ts-ignore
-//       netIncomeSelector.click();
+    const netIncomeSelectors: ElementHandle[] = await this.page.$x('//ul[@class="top"]/li[3]/a[text()="Net Income"]');
+    const netIncomeSelector: ElementHandle = netIncomeSelectors[0];
+    await netIncomeSelector.click();
 
-//       const netIncomeContainer = this
-//                                  .getArrayOf(netIncomeSelector
-// // @ts-ignore
-//                                              .parentNode.querySelectorAll('.open a'),
-//                                             );
-// // @ts-ignore
-//       const overTimeSelector = netIncomeContainer.find(e => e.text === 'Over Time');
-// // @ts-ignore
-//       overTimeSelector.click();
-//     });
+    const overTimeSelectors: ElementHandle[] = await this.page.$x('//ul[@class="top"]/li[3]/ul/li/a[text()="Over Time"]');
+    const overTimeSelector: ElementHandle = overTimeSelectors[0];
+    await overTimeSelector.click();
 
-//     await Mint.promisedBasedSleep(3000);
+    await Mint.promisedBasedSleep(3000);
 
-//     const netIncome = await this.getFacts();
+    const netIncome = await this.getFacts();
 
-//     return {
-//       spending,
-//       funFacts,
-//       netIncome,
-//     };
     return {
-      spending: 0,
+      funFacts,
+      netIncome,
+      spending: tranactionList,
     };
   }
 

@@ -1,7 +1,7 @@
 import { LaunchOptions } from 'puppeteer';
 
 const config: LaunchOptions = {
-  executablePath: process.env.CHROMEPATH,
+  // executablePath: process.env.CHROMEPATH,
   args: ['--no-sandbox'],
   devtools: true,
   headless: false,

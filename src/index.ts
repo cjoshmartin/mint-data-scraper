@@ -9,8 +9,7 @@ const mintScrape = async () => {
     // login
   await mint.loginToMint();
 
-  await Mint.promisedBasedSleep(5000);
-  await mint.page.screenshot({ path: 'buddy-screenshot.png' });
+  // await Mint.promisedBasedSleep(5000);
 
     // breaking here
 
@@ -25,7 +24,7 @@ const mintScrape = async () => {
         [cashSelector, 'cashAmount'],
   ];
   const assetsObj = {};
-  await Mint.promisedBasedSleep(3000);
+  await Mint.promisedBasedSleep(10000);
 
   for (let asset of assetsList) {
     const selector = asset[0];
@@ -35,7 +34,6 @@ const mintScrape = async () => {
     assetsObj[assetName] = await mint.getInnerTextOfSelector(selector);
   }
 
-  // TODO: Fix this
   const trends = await mint.getTrends();
   await mint.closeBrowser();
 

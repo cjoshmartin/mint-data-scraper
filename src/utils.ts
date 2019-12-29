@@ -53,9 +53,9 @@ class Utils {
     return listOfSelectors.find(e => e.text === searchValue) as any;
   }
 
-  async getSelectorFromArrayAndClick(selectors: string, searchValue: string, sleepTime: number = 0) {
+  async getSelectorFromArrayAndClick(selectors: string, searchValue: string, sleepTime: number = 0, parent = this.page) {
 
-    const listOfSelectors: ElementHandle[] = await this.page.$$(selectors);
+    const listOfSelectors: ElementHandle[] = await parent.$$(selectors);
 
     for (let i = 0; i < listOfSelectors.length; i += 1) {
       const selector: ElementHandle = listOfSelectors[i];
@@ -66,7 +66,7 @@ class Utils {
       if (isSearchElement) {
         await Utils.promisedBasedSleep(sleepTime);
         selector.click();
-        break;
+        return selector;
       }
     }
   }
@@ -87,8 +87,7 @@ class Utils {
 
   async waitForSelector(selector: string) {
     await this.page.waitForSelector(selector)
-            .then(() => console.log(`Saw '${selector}'`))
-            .catch(this.closeBrowser);
+            .then(() => console.log(`Saw '${selector}'`));
   }
 
   async isSelectorPresent(selector, timeOut = 5000) {
