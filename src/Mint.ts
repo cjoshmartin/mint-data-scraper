@@ -68,24 +68,10 @@ export default class Mint extends utils{
 
       await this.waitForSelector('#ius-mfa-confirm-code');
 
-      await this.page.evaluate((verificationCode) => {
-                // const inputField =
-
-// @ts-ignore
-        (document.getElementById('ius-mfa-confirm-code')).value = 999;
-                // console.log(inputField)
-                // inputField.value = verificationCode
-      },                       code);
-
       await this.page.type('input[id="ius-mfa-confirm-code"]', code);
       await this.page.keyboard.sendCharacter(code);
-      const input = await this.page.$('#ius-mfa-confirm-code');
-      await input.press('Backspace');
-      await input.type(code);
-
-      await this.clickButton('#ius-mfa-otp-sms-header');
       await Mint.promisedBasedSleep(1000);
-      await this.clickButton('input[type="submit"]');
+      await this.page.keyboard.press('Enter');
     }
 
   }
@@ -99,7 +85,9 @@ export default class Mint extends utils{
             process.env.MINT_PASSWORD,
             this.loginForm,
         );
-    if (this.parseBool(process.env.Should_LOAD_VERIFIY)) {
+
+    const isThereAVerifcation: boolean = await this.isSelectorPresent('#ius-mfa-user-mobile-phone');
+    if (isThereAVerifcation) {
       await this.verifitionPage();
     }
   }
