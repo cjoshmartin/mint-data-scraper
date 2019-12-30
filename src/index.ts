@@ -9,9 +9,7 @@ const mintScrape = async () => {
     // login
   await mint.loginToMint();
 
-  // await Mint.promisedBasedSleep(5000);
-
-    // breaking here
+  await Mint.promisedBasedSleep(5000);
 
   const assetsSelector = 'li.asset-total >  span';
   const debtTotalSelector = 'li.debt-total >  span';
@@ -42,8 +40,6 @@ const mintScrape = async () => {
     ...trends,
   };
 
-    // MongoDb stuff
-//   mint.insertInDB(output);
   return output;
 };
 

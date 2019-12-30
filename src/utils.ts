@@ -23,9 +23,54 @@ class Utils {
       // https://stackoverflow.com/questions/43431550/async-await-class-constructor
     const browser = await puppeteer.launch(config);
 
-    const page = await browser.newPage();
+    const pages = await browser.pages();
+    const page = pages[0];
     page.setViewport({ width: 1366, height: 768 });
+    await page.setRequestInterception(true);
 
+    const blockedResourceTypes = [
+      'image',
+      'media',
+      'font',
+      'texttrack',
+      'object',
+      'beacon',
+      'csp_report',
+      'imageset',
+    ];
+    
+    const skippedResources = [
+      'quantserve',
+      'adzerk',
+      'doubleclick',
+      'adition',
+      'exelator',
+      'sharethrough',
+      'cdn.api.twitter',
+      'google-analytics',
+      'googletagmanager',
+      'fontawesome',
+      'facebook',
+      'analytics',
+      'optimizely',
+      'clicktale',
+      'mixpanel',
+      'zedo',
+      'clicksor',
+      'tiqcdn',
+    ];
+    await page.setRequestInterception(true);
+    page.on('request', request => {
+      const requestUrl = request.url().split('?')[0].split('#')[0];
+      if (
+        blockedResourceTypes.indexOf(request.resourceType()) !== -1 ||
+        skippedResources.some(resource => requestUrl.indexOf(resource) !== -1)
+      ) {
+        request.abort();
+      } else {
+        request.continue();
+      }
+    });
     return new Utils(browser, page);
   }
 
