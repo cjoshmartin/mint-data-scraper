@@ -38,7 +38,7 @@ class Utils {
       'csp_report',
       'imageset',
     ];
-    
+
     const skippedResources = [
       'quantserve',
       'adzerk',
@@ -70,6 +70,9 @@ class Utils {
       } else {
         request.continue();
       }
+    });
+    page.on('error', _ => {
+      page.screenshot({path: 'fail_point.png'});
     });
     return new Utils(browser, page);
   }
