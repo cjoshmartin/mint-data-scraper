@@ -1,4 +1,5 @@
 import  puppeteer, { Page, Browser, ElementHandle, Serializable } from  'puppeteer';
+import { blockedResourceTypes, skippedResources } from './blockRequestContent';
 
 const fillField = (selector, val) => { document.querySelector(selector).value = val; };
 // @ts-ignore
@@ -28,49 +29,21 @@ class Utils {
     page.setViewport({ width: 1366, height: 768 });
     await page.setRequestInterception(true);
 
-    const blockedResourceTypes = [
-      'image',
-      'media',
-      'font',
-      'texttrack',
-      'object',
-      'beacon',
-      'csp_report',
-      'imageset',
-    ];
-
-    const skippedResources = [
-      'quantserve',
-      'adzerk',
-      'doubleclick',
-      'adition',
-      'exelator',
-      'sharethrough',
-      'cdn.api.twitter',
-      'google-analytics',
-      'googletagmanager',
-      'fontawesome',
-      'facebook',
-      'analytics',
-      'optimizely',
-      'clicktale',
-      'mixpanel',
-      'zedo',
-      'clicksor',
-      'tiqcdn',
-    ];
     await page.setRequestInterception(true);
+
     page.on('request', request => {
       const requestUrl = request.url().split('?')[0].split('#')[0];
-      if (
-        blockedResourceTypes.indexOf(request.resourceType()) !== -1 ||
-        skippedResources.some(resource => requestUrl.indexOf(resource) !== -1)
-      ) {
+      const shouldBlockResources: boolean =
+       blockedResourceTypes.indexOf(request.resourceType()) !== -1 ||
+        skippedResources.some(resource => requestUrl.indexOf(resource) !== -1);
+
+      if (shouldBlockResources) {
         request.abort();
       } else {
         request.continue();
       }
     });
+
     page.on('error', _ => {
       page.screenshot({path: 'fail_point.png'});
     });
